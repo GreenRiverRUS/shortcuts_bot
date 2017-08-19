@@ -2,9 +2,6 @@
 This bot allows you to create a simple text shortcuts and post
 them by choosing one in inline mode.
 
-### Example
-
-
 ### How to start bot
 - Clone repo
 - Install Fabric: `pip(3) install Fabric3`
