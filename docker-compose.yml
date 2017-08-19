@@ -1,0 +1,18 @@
+version: '2'
+
+networks:
+  default:
+    external:
+      name: ${NETWORK_NAME}
+
+services:
+  bot:
+    build: .
+    image: shortcuts_bot
+    restart: always
+    dns:
+      - 8.8.8.8
+    env_file:
+      - settings.env
+    ports:
+      - '${CONTAINER_PORT}:8000'

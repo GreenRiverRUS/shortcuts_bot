@@ -1,0 +1,3 @@
+tornado==4.4.2
+git+https://git@github.com/GreenRiverRUS/wcpan.telegram.git@1.1.0
+motor==1.1

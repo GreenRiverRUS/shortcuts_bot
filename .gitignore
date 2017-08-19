@@ -1,0 +1,7 @@
+.idea
+venv*
+*.py[cod]
+build/
+dist/
+*.egg-info
+settings.env
