@@ -1,7 +1,7 @@
 import logging
 import os
 
-from wcpan.telegram import api
+from wcpan.telegram import api, types
 from tornado.ioloop import IOLoop
 from tornado import web
 from motor.motor_tornado import MotorClient
@@ -14,7 +14,9 @@ logging.basicConfig(format='{levelname:8s} [{asctime}] {message}', style='{', le
 
 class Bot:
     def __init__(self, api_token: str,
-                 host: str, port: int = 8000, hook_url: str = '/hook',
+                 host: str, port: int = 8000,
+                 hook_url: str = '/hook',
+                 certificate_path: str = None,
                  mongo_host: str = '127.0.0.1', mongo_port: int = 27017,
                  mongo_db: str = 'shortcuts_bot'):
         self.token = api_token
@@ -22,6 +24,10 @@ class Bot:
         self.port = port
         self.hook_url = hook_url
         self.url = self.host + self.hook_url
+        if certificate_path:
+            self.certificate = types.InputFile(certificate_path)
+        else:
+            self.certificate = None
         self.mongo_host = mongo_host
         self.mongo_port = mongo_port
         self.mongo_db = mongo_db
@@ -31,7 +37,10 @@ class Bot:
 
     async def create_agent(self):
         agent = api.BotAgent(self.token)
-        await agent.listen(self.url)
+        await agent.client.set_webhook(
+            url=self.url, certificate=self.certificate
+        )
+        # await agent.listen(self.url)
         return agent
 
     def run(self):
@@ -53,6 +62,7 @@ if __name__ == '__main__':
     Bot(
         api_token=os.environ['BOT_API_TOKEN'],
         host=os.environ['WEBHOOK_HOST'],
+        certificate_path=os.environ.get('CERTIFICATE_PATH', None),
         mongo_host=os.environ['MONGO_HOST'],
         mongo_port=os.environ.get('MONGO_PORT', 27017),
         mongo_db=os.environ.get('MONGO_DB_NAME', 'shortcuts_bot')
