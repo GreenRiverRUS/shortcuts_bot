@@ -12,7 +12,7 @@ RUN apt-get clean && \
 
 COPY requirements.txt /
 RUN pip3 install -r requirements.txt
-COPY src /src
+COPY . /src
 
 WORKDIR src
 CMD python3 main.py

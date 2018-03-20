@@ -15,15 +15,12 @@ logging.basicConfig(format='{levelname:8s} [{asctime}] {message}', style='{', le
 class Bot:
     def __init__(self, api_token: str,
                  host: str, port: int = 8000,
-                 hook_url: str = '/hook',
                  certificate_path: str = None,
                  mongo_host: str = '127.0.0.1', mongo_port: int = 27017,
                  mongo_db: str = 'shortcuts_bot'):
         self.token = api_token
         self.host = host
         self.port = port
-        self.hook_url = hook_url
-        self.url = self.host + self.hook_url
         if certificate_path:
             self.certificate = types.InputFile(certificate_path)
         else:
@@ -37,10 +34,10 @@ class Bot:
 
     async def create_agent(self):
         agent = api.BotAgent(self.token)
-        await agent.client.set_webhook(
-            url=self.url, certificate=self.certificate
+        result = await agent.client.set_webhook(
+            url=self.host, certificate=self.certificate
         )
-        # await agent.listen(self.url)
+        logging.debug('Webhook set: {}'.format(result))
         return agent
 
     def run(self):
@@ -48,13 +45,13 @@ class Bot:
         db = MotorClient(self.mongo_host, self.mongo_port)[self.mongo_db]
         self.app = web.Application(
             handlers=[
-                (self.hook_url, BotHandler),
+                ('/', BotHandler),
             ],
             agent=agent,
             db=db
         )
         self.app.listen(self.port)
-        logging.info('Listening on {}, port {}'.format(self.url, self.port))
+        logging.info('Listening on {}, port {}'.format(self.host, self.port))
         self.loop.start()
 
 
